@@ -1,7 +1,23 @@
 from flask import Flask, jsonify
-from flask import Flask, render_template
+from flask import Flask, render_template, Response
+import cv2
+
+camera = cv2.VideoCapture('rtsp://freja.hiof.no:1935/rtplive/_definst_/hessdalen03.stream')
 
 app = Flask(_name_)
+
+def gen_frames(): # generate frame by frame from camera
+while True:
+# Capture frame-by-frame
+success, frame = camera.read() # read the camera frame
+if not success:
+break
+else:
+ret, buffer = cv2.imencode('.jpg', frame)
+frame = buffer.tobytes()
+yield (b'--frame\r\n'
+b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n') # concat frame one by one and show result
+
 
 data = [
         {
@@ -37,5 +53,13 @@ def Home(name):
 def name():
     return "<font color=brown>วรางคณา นุชเกษม</font> <br> <font color=orange>เลขที่18 ม.4/10</font> "
 
+@app.route('/vidio')
+def index():
+    return render_template('index.html')
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
 if _name_ == "_main_":
-    app.run(debug=False
+    app.run(debug=True)
