@@ -7,16 +7,16 @@ camera = cv2.VideoCapture('rtsp://freja.hiof.no:1935/rtplive/_definst_/hessdalen
 app = Flask(_name_)
 
 def gen_frames(): # generate frame by frame from camera
-while True:
-# Capture frame-by-frame
-success, frame = camera.read() # read the camera frame
-if not success:
-break
-else:
-ret, buffer = cv2.imencode('.jpg', frame)
-frame = buffer.tobytes()
-yield (b'--frame\r\n'
-b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n') # concat frame one by one and show result
+    while True:
+        # Capture frame-by-frame
+        success, frame = camera.read() # read the camera frame
+        if not success:
+            break
+        else:
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n') # concat frame one by one and show result
 
 
 data = [
@@ -41,17 +41,18 @@ data = [
 def hello():
     return "Hello Flask-Heroku"
 
+
 @app.route('/api', methods=['GET'])
 def get_api():
     return jsonify(data)
 
-@app.route('/hello/<string:name>')
-def Home(name):
-	return render_template('home.html', name_html=name)
-
 @app.route('/name')
 def name():
     return "<font color=brown>วรางคณา นุชเกษม</font> <br> <font color=orange>เลขที่18 ม.4/10</font> "
+
+@app.route('/hello/<string:name>')
+def Home(name):
+	return render_template('home.html', name_html=name)
 
 @app.route('/vidio')
 def index():
